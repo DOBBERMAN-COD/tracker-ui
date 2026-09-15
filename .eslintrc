@@ -1,0 +1,37 @@
+{
+  "extends": ["airbnb-base", "plugin:react/recommended"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true,
+  },
+  "parserOptions": {
+
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+    },
+  },
+  "plugins": ["react"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "globals": {
+    "React": "readonly",
+    "ReactDOM": "readonly",
+  },
+  "rules": {
+    "no-console": "off",
+    "no-alert": "off",
+    "linebreak-style": "off",
+    "import/extensions": [ "error", "always", { "ignorePackages": true } ],
+    "react/prop-types": "off",
+    "react/destructuring-assignment": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-no-undef": "off",
+    "react/jsx-indent": "off",
+    "react/jsx-tag-spacing": "off",
+  },
+}
