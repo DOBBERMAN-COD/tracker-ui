@@ -1,5 +1,6 @@
-dist 
+dist
 node_modules
 .env
+process.env
 public/*.js
 public/*.js.map

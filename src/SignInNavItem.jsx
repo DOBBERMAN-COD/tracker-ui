@@ -125,11 +125,11 @@ class SigninNavItem extends React.Component {
         );
       }
 
-      const auth2 = window.gapi.auth2.getAuthInstance();
+      // const auth2 = window.gapi.auth2.getAuthInstance();
 
-      if (auth2) {
-        await auth2.signOut();
-      }
+      // if (auth2) {
+      //   await auth2.signOut();
+      // }
 
       const { onUserChange } = this.props;
       onUserChange({ signedIn: false, givenName: '' });
