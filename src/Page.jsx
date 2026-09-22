@@ -95,7 +95,7 @@ export default class Page extends React.Component {
     const { user } = this.state;
     if (user == null) {
       const data = await Page.fetchData();
-      this.setState({ user: data.user });
+      if (data != null) this.setState({ user: data.user });
     }
   }
 
