@@ -25,6 +25,11 @@ app.use(express.static('public'));
 
 const apiProxyTarget = process.env.API_PROXY_TARGET;
 if (apiProxyTarget) {
+  const targetUrl = new URL(apiProxyTarget);
+  const externalHostname = process.env.RENDER_EXTERNAL_HOSTNAME;
+  if (externalHostname && targetUrl.hostname === externalHostname) {
+    throw new Error('API_PROXY_TARGET must point to the API service, not the UI service');
+  }
   app.use('/graphql', proxy({
     target: apiProxyTarget,
     changeOrigin: true,

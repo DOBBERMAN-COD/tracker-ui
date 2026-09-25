@@ -21,8 +21,8 @@ export default async function graphQLFetch(query, variables = {}, showError = nu
       if (typeof v === 'string' && /^\d+$/.test(v)) safeVars[k] = Number(v);
     });
 
-    const headers = {'Content-Type' : 'application/json'};
-    if(cookie) headers.Cookie = cookie;
+    const headers = { 'Content-Type': 'application/json' };
+    if (cookie) headers.Cookie = cookie;
     const response = await fetch(apiEndpoint, {
       method: 'POST',
       credentials: 'include',
@@ -30,7 +30,23 @@ export default async function graphQLFetch(query, variables = {}, showError = nu
       body: JSON.stringify({ query, variables: safeVars }),
     });
     const body = await response.text();
-    const result = JSON.parse(body, jsonDateReviver);
+    let result;
+    try {
+      result = JSON.parse(body, jsonDateReviver);
+    } catch (error) {
+      if (showError) {
+        showError(`GraphQL request failed (${response.status} ${response.statusText}): ${error.message}`);
+      }
+      return null;
+    }
+
+    if (!response.ok) {
+      if (showError) {
+        const message = result.message || result.error || response.statusText;
+        showError(`GraphQL request failed (${response.status}): ${message}`);
+      }
+      return null;
+    }
 
     if (result.errors) {
       const error = result.errors[0];
