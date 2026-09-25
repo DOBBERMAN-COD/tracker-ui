@@ -6,6 +6,31 @@ function jsonDateReviver(key, value) {
   return value;
 }
 
+function wait(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+function retryDelay(response, attempt) {
+  const retryAfter = response.headers.get('Retry-After');
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (!Number.isNaN(seconds)) return Math.min(seconds * 1000, 10000);
+
+    const retryDate = Date.parse(retryAfter);
+    if (!Number.isNaN(retryDate)) return Math.max(0, Math.min(retryDate - Date.now(), 10000));
+  }
+  return Math.min(500 * (2 ** attempt), 10000);
+}
+
+async function fetchWithRetry(apiEndpoint, request, isQuery, attempt = 0) {
+  const response = await fetch(apiEndpoint, request);
+  if (response.status === 429 && isQuery && attempt < 2) {
+    await wait(retryDelay(response, attempt));
+    return fetchWithRetry(apiEndpoint, request, isQuery, attempt + 1);
+  }
+  return response;
+}
+
 export default async function graphQLFetch(query, variables = {}, showError = null, cookie = null) {
   const isBrowser = typeof window !== 'undefined';
   const apiEndpoint = isBrowser
@@ -23,12 +48,14 @@ export default async function graphQLFetch(query, variables = {}, showError = nu
 
     const headers = { 'Content-Type': 'application/json' };
     if (cookie) headers.Cookie = cookie;
-    const response = await fetch(apiEndpoint, {
+    const request = {
       method: 'POST',
       credentials: 'include',
       headers,
       body: JSON.stringify({ query, variables: safeVars }),
-    });
+    };
+    const isQuery = /^\s*(query\b|\{)/i.test(query);
+    const response = await fetchWithRetry(apiEndpoint, request, isQuery);
     const body = await response.text();
     let result;
     try {
